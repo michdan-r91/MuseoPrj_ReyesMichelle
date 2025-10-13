@@ -1,0 +1,37 @@
+public async Task<bool> AddAutorLibroAsync(AutorLibroDto relacion)
+{
+    if (!_datosCargados)
+        throw new InvalidOperationException("Debe cargar los datos iniciales primero");
+
+    return await ExecuteAsync(async session =>
+    {
+        foreach (var idLibro in relacion.IdsLibros)
+        {
+            await session.RunAsync(
+                "MATCH (a:Autor {idAutor: $idAutor}), (l:Libro {idLibro: $idLibro}) " +
+                "MERGE (a)-[:ESCRIBIO]->(l)",
+                new { idAutor = relacion.IdAutor, idLibro }
+            );
+        }
+        return true;
+    });
+}
+
+public async Task<bool> AddPersonaClubAsync(PersonaClubDto relacion)
+{
+    if (!_datosCargados)
+        throw new InvalidOperationException("Debe cargar los datos iniciales primero");
+
+    return await ExecuteAsync(async session =>
+    {
+        foreach (var idClub in relacion.IdsClubes)
+        {
+            await session.RunAsync(
+                "MATCH (p:Persona {id: $idPersona}), (c:Club {idClub: $idClub}) " +
+                "MERGE (p)-[:PERTENECE]->(c)",
+                new { idPersona = relacion.IdPersona, idClub }
+            );
+        }
+        return true;
+    });
+}
